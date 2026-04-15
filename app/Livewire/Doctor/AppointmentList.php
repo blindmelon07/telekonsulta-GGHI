@@ -4,6 +4,7 @@ namespace App\Livewire\Doctor;
 
 use App\Models\Appointment;
 use App\Models\Doctor;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -23,6 +24,9 @@ class AppointmentList extends Component
     #[Url]
     public string $status = '';
 
+    #[Url]
+    public string $type = '';
+
     public function mount(): void
     {
         $this->date = today()->format('Y-m-d');
@@ -41,11 +45,12 @@ class AppointmentList extends Component
             ->where('doctor_id', $this->doctor->id)
             ->when($this->date, fn ($q) => $q->whereDate('scheduled_at', $this->date))
             ->when($this->status, fn ($q) => $q->where('status', $this->status))
+            ->when($this->type, fn ($q) => $q->where('type', $this->type))
             ->orderBy('scheduled_at')
             ->paginate(15);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.doctor.appointment-list');
     }

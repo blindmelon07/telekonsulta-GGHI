@@ -22,7 +22,7 @@
         </div>
 
         <div class="mt-6 flex justify-center gap-3">
-            <flux:button href="{{ route('patient.appointment', $this->appointment->id) }}" wire:navigate variant="primary">View Appointment</flux:button>
+            <flux:button href="{{ route('patient.appointments.show', $this->appointment->id) }}" wire:navigate variant="primary">View Appointment</flux:button>
             <flux:button href="{{ route('patient.dashboard') }}" wire:navigate variant="ghost">Dashboard</flux:button>
         </div>
     @elseif($this->appointment->payment_status === 'unpaid')

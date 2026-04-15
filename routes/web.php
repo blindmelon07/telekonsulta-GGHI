@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified', 'role:patient'])->prefix('patient')->name
     Route::livewire('/appointments', PatientAppointmentList::class)->name('appointments');
     Route::livewire('/appointments/{appointment}', PatientAppointmentDetail::class)->name('appointments.show');
     Route::livewire('/checkout/{appointment}', Checkout::class)->name('checkout');
-    Route::livewire('/payment/status/{payment}', PaymentStatus::class)->name('payment.status');
+    Route::livewire('/payment/status/{appointmentId}', PaymentStatus::class)->name('payment-status');
     Route::livewire('/payment/callback', PaymentStatus::class)->name('payment.callback');
     Route::livewire('/payments', PaymentHistory::class)->name('payments');
     Route::livewire('/medical-records', MedicalRecords::class)->name('medical-records');

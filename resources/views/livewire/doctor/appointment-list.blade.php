@@ -31,7 +31,10 @@
                 <flux:badge :color="match($appointment->status) { 'confirmed' => 'green', 'pending' => 'yellow', 'completed' => 'blue', 'no_show' => 'red', default => 'zinc' }" size="sm">
                     {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                 </flux:badge>
-                <flux:button href="{{ route('doctor.appointment', $appointment->id) }}" wire:navigate size="sm" variant="ghost">View</flux:button>
+                <flux:button href="{{ route('doctor.appointments.show', $appointment->id) }}" wire:navigate size="sm" variant="ghost">View</flux:button>
+                @if($appointment->status === 'confirmed' && $appointment->type === 'teleconsultation')
+                    <flux:button href="{{ route('doctor.meeting', $appointment->id) }}" wire:navigate size="sm" variant="primary" icon="video-camera">Start</flux:button>
+                @endif
             </div>
         @empty
             <div class="py-12 text-center text-zinc-500">No appointments for the selected date/status.</div>

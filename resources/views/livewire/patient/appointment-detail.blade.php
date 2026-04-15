@@ -51,7 +51,7 @@
         {{-- Teleconsultation join button --}}
         @if($this->appointment->type === 'teleconsultation' && $this->appointment->status === 'confirmed' && $this->appointment->zoom_join_url)
             <div class="mt-6">
-                <flux:button href="{{ route('patient.teleconsultation', $this->appointment->id) }}" wire:navigate variant="primary" icon="video-camera">
+                <flux:button href="{{ route('patient.teleconsultations', $this->appointment->id) }}" wire:navigate variant="primary" icon="video-camera">
                     Join Teleconsultation
                 </flux:button>
             </div>

@@ -33,7 +33,13 @@
                         <flux:badge :color="$appointment->payment_status === 'paid' ? 'green' : 'red'" size="sm">
                             {{ ucfirst($appointment->payment_status) }}
                         </flux:badge>
-                        <flux:button href="{{ route('patient.appointment', $appointment->id) }}" wire:navigate size="sm" variant="ghost">Details</flux:button>
+                        <flux:button href="{{ route('patient.appointments.show', $appointment->id) }}" wire:navigate size="sm" variant="ghost">Details</flux:button>
+                        @if($appointment->status === 'confirmed' && $appointment->type === 'teleconsultation')
+                            <flux:button href="{{ route('patient.teleconsultations', $appointment->id) }}" wire:navigate size="sm" variant="primary" icon="video-camera">Join</flux:button>
+                        @endif
+                        @if(in_array($appointment->status, ['pending', 'confirmed']) && $appointment->payment_status === 'unpaid')
+                            <flux:button href="{{ route('patient.checkout', $appointment->id) }}" wire:navigate size="sm" variant="primary">Pay</flux:button>
+                        @endif
                     </div>
                 </div>
             </div>

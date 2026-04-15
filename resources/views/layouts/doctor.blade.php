@@ -24,8 +24,8 @@
                     <flux:sidebar.item icon="clock" :href="route('doctor.schedule')" :current="request()->routeIs('doctor.schedule*')" wire:navigate>
                         {{ __('My Schedule') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="video" :href="route('doctor.meeting-room')" :current="request()->routeIs('doctor.meeting-room*')" wire:navigate>
-                        {{ __('Meeting Room') }}
+                    <flux:sidebar.item icon="video" :href="route('doctor.appointments', ['type' => 'teleconsultation'])" :current="false" wire:navigate>
+                        {{ __('Teleconsultations') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="banknotes" :href="route('doctor.earnings')" :current="request()->routeIs('doctor.earnings*')" wire:navigate>
                         {{ __('Earnings') }}

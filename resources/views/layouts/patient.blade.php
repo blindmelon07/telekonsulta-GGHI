@@ -21,13 +21,13 @@
                     <flux:sidebar.item icon="calendar" :href="route('patient.appointments')" :current="request()->routeIs('patient.appointments*')" wire:navigate>
                         {{ __('Appointments') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="video" :href="route('patient.teleconsultations')" :current="request()->routeIs('patient.teleconsultations*')" wire:navigate>
+                    <flux:sidebar.item icon="video" :href="route('patient.appointments', ['type' => 'teleconsultation'])" :current="false" wire:navigate>
                         {{ __('Teleconsultations') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="document-text" :href="route('patient.medical-records')" :current="request()->routeIs('patient.medical-records*')" wire:navigate>
                         {{ __('Medical Records') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="credit-card" :href="route('patient.payment-history')" :current="request()->routeIs('patient.payment-history*')" wire:navigate>
+                    <flux:sidebar.item icon="credit-card" :href="route('patient.payments')" :current="request()->routeIs('patient.payments*')" wire:navigate>
                         {{ __('Payments') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
@@ -48,7 +48,7 @@
                         <flux:badge size="sm" color="red" class="ml-auto">{{ auth()->user()->unreadNotificationsCount() }}</flux:badge>
                     @endif
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="cog-6-tooth" :href="route('patient.profile.edit')" wire:navigate>
+                <flux:sidebar.item icon="cog-6-tooth" :href="route('patient.profile')" :current="request()->routeIs('patient.profile*')" wire:navigate>
                     {{ __('Profile') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
@@ -63,7 +63,7 @@
             <flux:dropdown position="top" align="end">
                 <flux:profile :initials="auth()->user()->initials()" icon-trailing="chevron-down" />
                 <flux:menu>
-                    <flux:menu.item :href="route('patient.profile.edit')" icon="cog" wire:navigate>{{ __('Profile') }}</flux:menu.item>
+                    <flux:menu.item :href="route('patient.profile')" icon="cog" wire:navigate>{{ __('Profile') }}</flux:menu.item>
                     <flux:menu.separator />
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf

@@ -43,7 +43,7 @@
                     <flux:badge :color="match($appointment->type) { 'teleconsultation' => 'green', default => 'blue' }">
                         {{ ucfirst(str_replace('_', '-', $appointment->type)) }}
                     </flux:badge>
-                    <flux:button href="{{ route('patient.appointment', $appointment->id) }}" wire:navigate size="sm" variant="ghost">View</flux:button>
+                    <flux:button href="{{ route('patient.appointments.show', $appointment->id) }}" wire:navigate size="sm" variant="ghost">View</flux:button>
                 </div>
             @empty
                 <div class="p-8 text-center text-zinc-500">
