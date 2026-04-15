@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/xampp2/htdocs/teleconsultation/app/Livewire -type f -exec wc -l {} +)",
+      "Bash(composer require *)",
+      "Bash(mysql -u root -e \"CREATE DATABASE IF NOT EXISTS mediconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(/c/xampp2/mysql/bin/mysql -u root -e \"CREATE DATABASE IF NOT EXISTS mediconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(/c/xampp2/mysql/bin/mysql -u root --password=\"\" -e \"CREATE DATABASE IF NOT EXISTS mediconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(/c/xampp2/mysql/bin/mysql -u root -ppassword -e \"CREATE DATABASE IF NOT EXISTS mediconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; SHOW DATABASES;\")",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "mcp__laravel-boost__get-absolute-url",
+      "mcp__laravel-boost__search-docs"
+    ]
+  }
+}

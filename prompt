@@ -1,0 +1,470 @@
+You are an expert Laravel developer. Build a complete Doctor Appointment System using:
+
+- Laravel 13
+- Livewire 4 (use ONLY Livewire 4 syntax throughout — see syntax reference below)
+- Tailwind CSS v4
+- Alpine.js
+- Spatie Laravel Permission v6
+- PayMongo (GCash, Maya, GrabPay, credit card)
+- Zoom API (Server-to-Server OAuth)
+- MySQL
+- Laravel Echo + Pusher (real-time)
+
+---
+
+## LIVEWIRE 4 SYNTAX REFERENCE
+Use ONLY these patterns. Do NOT use Livewire 2 or 3 patterns.
+
+### Component class structure
+doctorId = $doctorId;
+    }
+
+    // Computed property — cached per request, accessed as $this->slots
+    #[Computed]
+    public function slots(): array
+    {
+        return app(SlotGeneratorService::class)
+            ->getAvailableSlots($this->doctorId, $this->selectedDate, $this->appointmentType);
+    }
+
+    #[Computed]
+    public function doctor(): Doctor
+    {
+        return Doctor::with('user', 'specialization')->findOrFail($this->doctorId);
+    }
+
+    // Lifecycle hook: called when $selectedDate is updated
+    public function updatedSelectedDate(string $value): void
+    {
+        $this->selectedSlot = '';
+        $this->resetValidation('selectedDate');
+    }
+
+    // Action method
+    public function nextStep(): void
+    {
+        $this->validateOnly(['selectedDate', 'selectedSlot', 'reason']);
+        $this->step++;
+    }
+
+    public function submitBooking(): void
+    {
+        $this->validate();
+        $appointment = app(AppointmentService::class)->book(
+            patientId: auth()->id(),
+            doctorId: $this->doctorId,
+            slot: $this->selectedSlot,
+            type: $this->appointmentType,
+            reason: $this->reason,
+        );
+        $this->appointmentId = $appointment->id;
+        // Dispatch event to sibling/parent component
+        $this->dispatch('appointment-booked', appointmentId: $appointment->id);
+        $this->redirectRoute('patient.checkout', $appointment->id);
+    }
+
+    // Listen for events from other components or JS
+    #[On('payment-confirmed')]
+    public function onPaymentConfirmed(int $appointmentId): void
+    {
+        // handle post-payment UI update
+    }
+
+    // Renderless action — no re-render needed
+    #[Renderless]
+    public function markAsRead(int $notificationId): void
+    {
+        auth()->user()->notifications()->find($notificationId)?->markAsRead();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view('livewire.patient.book-appointment');
+    }
+}
+
+### Blade view patterns (Livewire 4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Browse Doctors
+
+
+
+    Book Now
+    Processing...
+
+
+
+
+    Cancel
+
+
+
+
+
+
+
+
+...
+
+
+
+@foreach($this->slots as $slot)
+    {{ $slot }}
+@endforeach
+
+
+
+
+
+
+
+
+### Volt (functional single-file components) — use for simpler components
+ [],
+    'unreadCount' => 0,
+]);
+
+mount(function () {
+    $this->notifications = auth()->user()->notifications()->latest()->take(10)->get();
+    $this->unreadCount = auth()->user()->unreadNotifications()->count();
+});
+
+$markAllRead = function () {
+    auth()->user()->unreadNotifications->markAsRead();
+    $this->unreadCount = 0;
+};
+
+on(['notification-received' => function () {
+    $this->unreadCount++;
+}]);
+?>
+
+
+
+    Mark all read ({{ $unreadCount }})
+
+
+
+### Lazy loading components
+
+
+
+### Teleport (render outside component DOM)
+
+
+    @teleport('body')
+        ...
+    @endteleport
+
+
+
+---
+
+## ROLES & PERMISSIONS (Spatie v6)
+
+Install: composer require spatie/laravel-permission
+
+Roles: super_admin, admin, doctor, patient
+
+Patient permissions:
+  book appointment, cancel appointment, view own appointments,
+  view own medical records, make payment, join teleconsultation
+
+Doctor permissions:
+  manage own schedule, view assigned appointments,
+  update appointment status, add medical notes,
+  start teleconsultation, view own earnings
+
+Admin permissions:
+  manage doctors, manage patients, manage all appointments,
+  view reports, manage payments, manage system settings
+
+RolesAndPermissionsSeeder:
+  - Create roles & permissions via Spatie
+  - assignRole() on users
+  - Gate::before for super_admin wildcard
+  - Use @role / @can / @canany in all Blade files
+  - Use middleware(['role:admin|super_admin']) on route groups
+  - Use middleware(['permission:book appointment']) on booking routes
+
+---
+
+## DATABASE SCHEMA
+
+users (id, name, email, password, phone, profile_photo, date_of_birth, gender, address, is_active, email_verified_at, timestamps)
+patient_profiles (id, user_id FK, blood_type, allergies, medical_history, emergency_contact_name, emergency_contact_phone, philhealth_number, timestamps)
+specializations (id, name, icon, description, timestamps)
+doctors (id, user_id FK, specialization_id FK, bio, consultation_fee, teleconsultation_fee, experience_years, license_number, clinic_address, is_available_online, is_active, timestamps)
+schedules (id, doctor_id FK, day_of_week, start_time, end_time, slot_duration_minutes, appointment_type: in_person|teleconsultation|both, is_active, timestamps)
+appointments (id, patient_id FK, doctor_id FK, scheduled_at, end_time, type, status: pending|confirmed|completed|cancelled|no_show, reason, notes, payment_status: unpaid|paid|refunded, amount, zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password, timestamps)
+medical_records (id, appointment_id FK, patient_id FK, doctor_id FK, chief_complaint, diagnosis, prescription, lab_requests, notes, follow_up_date, timestamps)
+payments (id, appointment_id FK, patient_id FK, paymongo_payment_intent_id, paymongo_source_id, method: gcash|maya|card|grab_pay, amount, currency: PHP, status: pending|paid|failed|refunded, paid_at, metadata JSON, timestamps)
+notifications (id, user_id FK, type, title, message, data JSON, read_at, timestamps)
+
+All monetary values stored in centavos (integer). Display as PHP Peso.
+All datetimes use Asia/Manila timezone.
+
+---
+
+## PATIENT ACCOUNT SYSTEM
+
+### Multi-step registration (Livewire 4 Volt component)
+Step 1 — Basic info: name, email, password, phone
+Step 2 — Personal: date of birth, gender, address
+Step 3 — Medical profile: blood type, allergies, medical history
+Step 4 — Email verification (MustVerifyEmail)
+
+Use state() from Volt, validated with #[Validate] per step.
+Use $this->dispatch('step-completed', step: $this->step) between steps.
+
+### Patient dashboard sections
+- Overview — upcoming appointments, metric cards
+- Appointments — tabs: upcoming/past/cancelled (wire:navigate between tabs)
+- Medical Records — accordion view per appointment
+- Payments — history table + receipt download (PDF)
+- Teleconsultations — Zoom join button, countdown timer
+- Profile — edit personal + medical info
+- Notifications — bell dropdown (wire:poll.30s) + dedicated page
+
+---
+
+## PAYMONGO INTEGRATION
+
+Env: PAYMONGO_SECRET_KEY, PAYMONGO_PUBLIC_KEY, PAYMONGO_WEBHOOK_SECRET
+
+PaymentService.php methods:
+- createPaymentIntent(int $amountCentavos, string $description, array $metadata): array
+- createSource(string $type, int $amount, array $redirectUrls): array
+- attachPaymentMethod(string $intentId, string $methodId): array
+- handleWebhook(Request $request): void
+  → Verify X-PayMongo-Signature
+  → payment.paid → update payments + appointment, dispatch CreateZoomMeetingJob
+  → source.chargeable → auto-charge
+  → payment.failed → notify patient
+
+CheckoutComponent (Livewire 4):
+- state: paymentMethod, cardNumber, cardExpiry, cardCvc, isProcessing
+- #[Locked] appointmentId
+- #[Computed] appointment()
+- submitPayment() action — wire:click with wire:loading state
+- wire:confirm on GCash/Maya redirect ("You will be redirected to complete payment")
+- #[On('payment-status-updated')] to refresh UI
+
+PaymentStatusComponent:
+- wire:poll.3s="checkPaymentStatus" while status=pending
+- Stop polling once paid or failed
+
+---
+
+## ZOOM API INTEGRATION
+
+Env: ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET
+
+ZoomService.php:
+- getAccessToken(): string — Server-to-Server OAuth, cached 55 min
+- createMeeting(array $data): array
+  → topic, type:2, start_time (ISO8601 Asia/Manila), duration, password (random 6-char),
+     settings: waiting_room:true, host_video:true, participant_video:true
+  → Store zoom_meeting_id, zoom_join_url, zoom_start_url, zoom_password in appointment
+- deleteMeeting(string $meetingId): void — on cancellation
+- updateMeeting(string $meetingId, array $data): void — on reschedule
+
+TeleconsultationRoomComponent (Livewire 4 Volt):
+- state: appointment, timeUntilMeeting, canJoin (within 5 min of start)
+- wire:poll.60s="refreshCountdown"
+- Show Join Meeting button when canJoin = true
+- #[On('appointment-confirmed')] refreshes meeting details
+
+DoctorMeetingComponent (Livewire 4 Volt):
+- Start Meeting button (zoom_start_url) opens in new tab
+- Quick notes form (wire:model.live="quickNote")
+- markComplete() action dispatches 'appointment-completed' event
+
+---
+
+## ALL LIVEWIRE 4 COMPONENTS
+
+### Auth & Onboarding (Volt)
+- livewire/auth/register-patient.blade.php — multi-step Volt wizard
+- livewire/auth/login.blade.php
+- livewire/auth/verify-email.blade.php
+
+### Public (full-page, #[Layout('layouts.guest')])
+- App\Livewire\Public\DoctorListing — #[Url] search, #[Url] specialization, #[Url] type
+- App\Livewire\Public\DoctorProfile — #[Computed] doctor(), availableSlots()
+- App\Livewire\Public\BookAppointment — multi-step, #[Locked] doctorId
+
+### Patient (full-page, #[Layout('layouts.patient')])
+- App\Livewire\Patient\Dashboard — #[Computed] upcomingAppointments(), stats()
+- App\Livewire\Patient\AppointmentList — #[Url] tab, #[Url] page, wire:navigate tabs
+- App\Livewire\Patient\AppointmentDetail — #[Locked] appointmentId
+- App\Livewire\Patient\Checkout — #[Locked] appointmentId, PayMongo form
+- App\Livewire\Patient\PaymentStatus — wire:poll.3s while pending
+- App\Livewire\Patient\PaymentHistory — #[Url] page, #[Url] status filter
+- App\Livewire\Patient\MedicalRecords — #[Url] search
+- App\Livewire\Patient\TeleconsultationRoom — wire:poll.60s countdown
+- App\Livewire\Patient\ProfileEdit — #[Validate] inline, multi-tab
+- App\Livewire\Patient\Notifications — wire:poll.30s unread count
+
+### Doctor (full-page, #[Layout('layouts.doctor')])
+- App\Livewire\Doctor\Dashboard — #[Computed] todaySchedule(), stats()
+- App\Livewire\Doctor\ScheduleManager — CRUD with wire:confirm on delete
+- App\Livewire\Doctor\AppointmentList — #[Url] date, #[Url] status
+- App\Livewire\Doctor\AppointmentDetail — update status, add medical notes, #[Locked]
+- App\Livewire\Doctor\MedicalNoteForm — #[Validate] inline
+- App\Livewire\Doctor\Earnings — #[Url] period, #[Computed] summary()
+- App\Livewire\Doctor\MeetingRoom — start Zoom, quick notes (Volt)
+
+### Admin (full-page, #[Layout('layouts.admin')])
+- App\Livewire\Admin\Dashboard — system KPIs, #[Computed] metrics()
+- App\Livewire\Admin\ManageDoctors — #[Url] search, CRUD, wire:confirm
+- App\Livewire\Admin\ManagePatients — #[Url] search, deactivate
+- App\Livewire\Admin\AppointmentOversight — #[Url] filters, export CSV
+- App\Livewire\Admin\PaymentOversight — #[Url] status, refund action
+- App\Livewire\Admin\Reports — Chart.js charts via #[Computed] chartData()
+- App\Livewire\Admin\SystemSettings — site config, maintenance toggle
+
+### Shared components (Volt, no full-page)
+- livewire/shared/notification-bell.blade.php — wire:poll.30s, unread badge
+- livewire/shared/appointment-card.blade.php — #[Reactive] appointmentId
+- livewire/shared/confirm-modal.blade.php — @teleport('body')
+
+---
+
+## BOOKING FLOW (complete)
+1. DoctorListing → DoctorProfile (wire:navigate)
+2. BookAppointment step 1: type (in_person | teleconsultation)
+3. Step 2: date picker → updatedSelectedDate() clears slot
+4. Step 3: slot picker from #[Computed] slots() — excludes booked
+5. Step 4: reason, review summary
+6. submitBooking() → AppointmentService::book() → appointment(pending,unpaid)
+7. $this->dispatch('appointment-booked') → redirect to Checkout
+8. Checkout: PayMongo payment intent or source
+9. Webhook: payment.paid → ConfirmAppointmentListener → CreateZoomMeetingJob
+10. #[On('payment-confirmed')] updates UI, patient notified
+11. Doctor confirms (teleconsult already confirmed by payment)
+12. 15 min before → reminder notification (wire:poll or Pusher)
+13. Post-visit → doctor marks complete → adds MedicalRecord
+
+---
+
+## SLOT GENERATOR (SlotGeneratorService.php)
+
+public function getAvailableSlots(int $doctorId, string $date, string $type): array
+- Fetch schedule for doctor + day_of_week matching $date + matching $type
+- Generate slots: start_time → end_time in slot_duration_minutes steps
+- Query booked appointments (status != cancelled) for that doctor + date
+- Filter out booked slots
+- Filter out past slots (no bookings within 2 hours from now)
+- Return array of 'H:i' strings e.g. ['09:00','09:30','10:00']
+
+---
+
+## JOBS, EVENTS & LISTENERS
+
+Jobs (queued via database driver):
+- CreateZoomMeetingJob(int $appointmentId)
+- DeleteZoomMeetingJob(int $appointmentId)
+- SendPaymentReceiptJob(int $paymentId)
+- ProcessPayMongoRefundJob(int $paymentId)
+- SendAppointmentReminderJob(int $appointmentId)
+
+Events → Listeners:
+- AppointmentBooked → [NotifyDoctorNewBooking, NotifyPatientBookingReceived]
+- PaymentConfirmed → [ConfirmAppointmentListener, CreateZoomMeetingJob::dispatch()]
+- AppointmentConfirmed → [NotifyPatientConfirmed]
+- AppointmentCancelled → [NotifyPatientCancellation, DeleteZoomMeetingJob::dispatch()]
+
+Artisan Commands:
+- appointments:send-reminders — fire SendAppointmentReminderJob for upcoming
+- appointments:mark-no-show — auto-mark missed past appointments
+- payments:check-pending — re-query PayMongo for stuck pending payments
+
+Scheduling (bootstrap/app.php):
+Schedule::command('appointments:send-reminders')->everyFifteenMinutes();
+Schedule::command('appointments:mark-no-show')->hourly();
+Schedule::command('payments:check-pending')->everyThirtyMinutes();
+
+---
+
+## REUSABLE BLADE COMPONENTS (x-)
+
+
+
+
+
+...
+
+
+
+
+---
+
+## ENVIRONMENT VARIABLES
+
+APP_NAME="MediConnect"
+APP_TIMEZONE=Asia/Manila
+
+PAYMONGO_SECRET_KEY=sk_live_xxxx
+PAYMONGO_PUBLIC_KEY=pk_live_xxxx
+PAYMONGO_WEBHOOK_SECRET=whsec_xxxx
+
+ZOOM_ACCOUNT_ID=xxxx
+ZOOM_CLIENT_ID=xxxx
+ZOOM_CLIENT_SECRET=xxxx
+
+PUSHER_APP_ID=xxxx
+PUSHER_APP_KEY=xxxx
+PUSHER_APP_SECRET=xxxx
+PUSHER_APP_CLUSTER=ap1
+
+QUEUE_CONNECTION=database
+
+---
+
+## DELIVERABLES
+
+Generate complete, production-ready code for:
+1. All migrations + models (HasRoles trait, relationships, Eloquent scopes, casts)
+2. RolesAndPermissionsSeeder (Spatie v6) + all other seeders
+3. All Livewire 4 full-page components — class + Blade (use #[Title], #[Layout], #[Url], #[Locked], #[Computed], #[Validate], #[On], #[Reactive] as appropriate per component)
+4. All Volt single-file components for simpler UI (notification bell, meeting room, shared cards)
+5. Multi-step patient registration Volt wizard with per-step inline validation
+6. PaymentService.php — full PayMongo implementation
+7. ZoomService.php — Server-to-Server OAuth + meeting CRUD
+8. AppointmentService.php + SlotGeneratorService.php
+9. PayMongoWebhookController — signature verification
+10. All Jobs, Events, Listeners
+11. Artisan commands + scheduling
+12. Reusable Blade x- components
+13. Role-specific layouts (layouts/patient.blade.php, doctor, admin, guest) with Livewire sidebar nav
+14. Route groups in web.php using role/permission middleware
+
+---
+
+CRITICAL LIVEWIRE 4 RULES:
+- wire:model is LAZY by default — always add .live when real-time sync is needed
+- Use #[Computed] for all derived data — never compute in render()
+- Use $this->dispatch() — never $this->emit()
+- Use #[On('event-name')] — never protected $listeners = []
+- Use #[Validate] inline — never protected $rules = []
+- Use wire:navigate for internal links — enables SPA mode
+- Use wire:confirm for destructive actions — no custom JS confirm dialogs
+- Use #[Locked] on any property that must not be modified from the frontend
+- Use @teleport('body') for modals and overlays
+- Use wire:loading.class / wire:loading.attr for loading states on buttons
+- Use Volt for simple, self-contained UI pieces; use full Component class for complex logic
+- All components must type-hint all public properties (int, string, bool, array)
+- Use validateOnly() for per-step multi-form validation
