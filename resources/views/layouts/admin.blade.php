@@ -6,9 +6,8 @@
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <div class="flex items-center gap-2 px-2">
-                    <flux:icon.shield-check class="size-6 text-violet-600" />
-                    <flux:heading size="lg" class="font-bold text-violet-600">MediConnect Admin</flux:heading>
+                <div class="flex items-center px-2">
+                    <img src="{{ asset('images/gghi logo (1).png') }}" alt="MediConnect" class="h-8 w-auto" />
                 </div>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>

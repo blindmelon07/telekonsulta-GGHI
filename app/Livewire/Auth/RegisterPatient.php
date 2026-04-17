@@ -57,7 +57,7 @@ class RegisterPatient extends Component
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'same:passwordConfirmation'],
             'phone' => ['required', 'string', 'max:20'],
         ];
     }
@@ -76,6 +76,7 @@ class RegisterPatient extends Component
         match ($this->step) {
             1 => $this->validate($this->stepOneRules()),
             2 => $this->validate($this->stepTwoRules()),
+            default => null,
         };
 
         $this->step++;
@@ -115,7 +116,7 @@ class RegisterPatient extends Component
 
         Auth::login($user);
 
-        $this->redirectRoute('verification.notice');
+        $this->redirectRoute('dashboard');
     }
 
     public function render(): View

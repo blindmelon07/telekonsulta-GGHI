@@ -26,10 +26,14 @@ use App\Livewire\Patient\PaymentHistory;
 use App\Livewire\Patient\PaymentStatus;
 use App\Livewire\Patient\ProfileEdit;
 use App\Livewire\Patient\TeleconsultationRoom;
+use App\Livewire\Auth\RegisterPatient;
 use App\Livewire\Public\BookAppointment;
 use App\Livewire\Public\DoctorListing;
 use App\Livewire\Public\DoctorProfile;
 use Illuminate\Support\Facades\Route;
+
+// Auth routes (override Fortify's GET-only register route)
+Route::get('/register', RegisterPatient::class)->middleware('guest')->name('register');
 
 // Public routes
 Route::view('/', 'welcome')->name('home');
@@ -41,7 +45,7 @@ Route::livewire('/doctors/{doctor}/book', BookAppointment::class)->name('doctors
 Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->name('webhooks.paymongo');
 
 // Patient routes
-Route::middleware(['auth', 'verified', 'role:patient'])->prefix('patient')->name('patient.')->group(function () {
+Route::middleware(['auth', 'role:patient'])->prefix('patient')->name('patient.')->group(function () {
     Route::livewire('/dashboard', PatientDashboard::class)->name('dashboard');
     Route::livewire('/appointments', PatientAppointmentList::class)->name('appointments');
     Route::livewire('/appointments/{appointment}', PatientAppointmentDetail::class)->name('appointments.show');
@@ -56,7 +60,7 @@ Route::middleware(['auth', 'verified', 'role:patient'])->prefix('patient')->name
 });
 
 // Doctor routes
-Route::middleware(['auth', 'verified', 'role:doctor'])->prefix('doctor')->name('doctor.')->group(function () {
+Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->name('doctor.')->group(function () {
     Route::livewire('/dashboard', DoctorDashboard::class)->name('dashboard');
     Route::livewire('/schedule', ScheduleManager::class)->name('schedule');
     Route::livewire('/appointments', DoctorAppointmentList::class)->name('appointments');
@@ -68,7 +72,7 @@ Route::middleware(['auth', 'verified', 'role:doctor'])->prefix('doctor')->name('
 });
 
 // Admin routes
-Route::middleware(['auth', 'verified', 'role:admin|super_admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin|super_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::livewire('/dashboard', AdminDashboard::class)->name('dashboard');
     Route::livewire('/doctors', ManageDoctors::class)->name('doctors');
     Route::livewire('/patients', ManagePatients::class)->name('patients');
@@ -79,7 +83,7 @@ Route::middleware(['auth', 'verified', 'role:admin|super_admin'])->prefix('admin
 });
 
 // Authenticated redirect — send users to their role-based dashboard
-Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+Route::middleware(['auth'])->get('/dashboard', function () {
     $user = auth()->user();
 
     if ($user->hasRole('super_admin') || $user->hasRole('admin')) {

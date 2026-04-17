@@ -9,7 +9,11 @@
       "Bash(/c/xampp2/mysql/bin/mysql -u root -ppassword -e \"CREATE DATABASE IF NOT EXISTS mediconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; SHOW DATABASES;\")",
       "Bash(vendor/bin/pint --dirty --format agent)",
       "mcp__laravel-boost__get-absolute-url",
-      "mcp__laravel-boost__search-docs"
+      "mcp__laravel-boost__search-docs",
+      "Bash(vendor/bin/pint app/Livewire/Auth/RegisterPatient.php --format agent)",
+      "Bash(vendor/bin/pint app/Livewire/Admin/ManageDoctors.php --format agent)",
+      "Bash(vendor/bin/pint app/Livewire/Public/BookAppointment.php --format agent)",
+      "mcp__laravel-boost__database-query"
     ]
   }
 }

@@ -8,9 +8,8 @@
         <nav class="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
-                    <a href="{{ route('home') }}" wire:navigate class="flex items-center gap-2">
-                        <flux:icon.heart-pulse class="size-7 text-blue-600" />
-                        <span class="text-xl font-bold text-blue-600">MediConnect</span>
+                    <a href="{{ route('home') }}" wire:navigate class="flex items-center">
+                        <img src="{{ asset('images/gghi logo (1).png') }}" alt="MediConnect" class="h-10 w-auto" />
                     </a>
 
                     <div class="hidden items-center gap-6 md:flex">

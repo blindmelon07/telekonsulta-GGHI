@@ -6,10 +6,10 @@ use App\Models\Doctor;
 use App\Services\AppointmentService;
 use App\Services\SlotGeneratorService;
 use Carbon\Carbon;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -37,9 +37,9 @@ class BookAppointment extends Component
 
     public bool $isProcessing = false;
 
-    public function mount(int $doctorId): void
+    public function mount(int $doctor): void
     {
-        $this->doctorId = $doctorId;
+        $this->doctorId = $doctor;
         $this->selectedDate = now()->addDay()->format('Y-m-d');
     }
 
@@ -52,7 +52,7 @@ class BookAppointment extends Component
     #[Computed]
     public function slots(): array
     {
-        if (! $this->selectedDate) {
+        if (! $this->selectedDate || ! $this->doctorId) {
             return [];
         }
 
@@ -67,19 +67,22 @@ class BookAppointment extends Component
     {
         $this->selectedSlot = '';
         $this->resetValidation('selectedDate');
+        unset($this->slots);
     }
 
     public function updatedAppointmentType(): void
     {
         $this->selectedSlot = '';
+        unset($this->slots);
     }
 
     public function nextStep(): void
     {
         match ($this->step) {
-            1 => $this->validateOnly(['appointmentType']),
-            2 => $this->validateOnly(['selectedDate', 'selectedSlot']),
-            3 => $this->validateOnly(['reason']),
+            1 => $this->validateOnly('appointmentType'),
+            2 => $this->validate(['selectedDate' => 'required|date|after:today', 'selectedSlot' => 'required']),
+            3 => $this->validateOnly('reason'),
+            default => null,
         };
 
         $this->step++;
@@ -116,7 +119,7 @@ class BookAppointment extends Component
         $this->redirectRoute('patient.checkout', $appointment->id);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.public.book-appointment');
     }

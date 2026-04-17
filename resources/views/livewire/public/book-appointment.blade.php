@@ -26,21 +26,21 @@
         @if($step === 1)
             <h2 class="mb-4 text-lg font-semibold dark:text-white">Select Appointment Type</h2>
             <div class="grid gap-4 sm:grid-cols-2">
-                <label @class(['cursor-pointer rounded-lg border-2 p-4 transition', 'border-blue-500 bg-blue-50 dark:bg-blue-950' => $appointmentType === 'in_person', 'border-zinc-200 dark:border-zinc-700' => $appointmentType !== 'in_person'])>
-                    <input type="radio" wire:model="appointmentType" value="in_person" class="sr-only">
+                <div wire:click="$set('appointmentType', 'in_person')"
+                    @class(['cursor-pointer rounded-lg border-2 p-4 transition', 'border-blue-500 bg-blue-50 dark:bg-blue-950' => $appointmentType === 'in_person', 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' => $appointmentType !== 'in_person'])>
                     <flux:icon.building-office class="mb-2 size-8 text-blue-600" />
                     <p class="font-semibold dark:text-white">In-Person</p>
                     <p class="text-sm text-zinc-500">Visit the clinic</p>
                     <p class="mt-1 font-bold text-blue-600">₱{{ number_format($this->doctor->consultation_fee / 100, 0) }}</p>
-                </label>
+                </div>
                 @if($this->doctor->is_available_online)
-                <label @class(['cursor-pointer rounded-lg border-2 p-4 transition', 'border-green-500 bg-green-50 dark:bg-green-950' => $appointmentType === 'teleconsultation', 'border-zinc-200 dark:border-zinc-700' => $appointmentType !== 'teleconsultation'])>
-                    <input type="radio" wire:model="appointmentType" value="teleconsultation" class="sr-only">
+                <div wire:click="$set('appointmentType', 'teleconsultation')"
+                    @class(['cursor-pointer rounded-lg border-2 p-4 transition', 'border-green-500 bg-green-50 dark:bg-green-950' => $appointmentType === 'teleconsultation', 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' => $appointmentType !== 'teleconsultation'])>
                     <flux:icon.video-camera class="mb-2 size-8 text-green-600" />
                     <p class="font-semibold dark:text-white">Teleconsultation</p>
                     <p class="text-sm text-zinc-500">Online via Zoom</p>
                     <p class="mt-1 font-bold text-green-600">₱{{ number_format($this->doctor->teleconsultation_fee / 100, 0) }}</p>
-                </label>
+                </div>
                 @endif
             </div>
         @endif

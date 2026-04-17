@@ -6,9 +6,8 @@
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <div class="flex items-center gap-2 px-2">
-                    <flux:icon.heart-pulse class="size-6 text-blue-600" />
-                    <flux:heading size="lg" class="font-bold text-blue-600">MediConnect</flux:heading>
+                <div class="flex items-center px-2">
+                    <img src="{{ asset('images/gghi logo (1).png') }}" alt="MediConnect" class="h-8 w-auto" />
                 </div>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
@@ -21,7 +20,7 @@
                     <flux:sidebar.item icon="calendar" :href="route('patient.appointments')" :current="request()->routeIs('patient.appointments*')" wire:navigate>
                         {{ __('Appointments') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="video" :href="route('patient.appointments', ['type' => 'teleconsultation'])" :current="false" wire:navigate>
+                    <flux:sidebar.item icon="video-camera" :href="route('patient.appointments', ['type' => 'teleconsultation'])" :current="false" wire:navigate>
                         {{ __('Teleconsultations') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="document-text" :href="route('patient.medical-records')" :current="request()->routeIs('patient.medical-records*')" wire:navigate>

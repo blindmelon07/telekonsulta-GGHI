@@ -56,7 +56,7 @@
                 </div>
             @empty
                 <div class="col-span-full py-20 text-center text-zinc-500">
-                    <flux:icon.user-slash class="mx-auto mb-4 size-12 opacity-40" />
+                    <flux:icon.user-minus class="mx-auto mb-4 size-12 opacity-40" />
                     <p>No doctors found matching your criteria.</p>
                 </div>
             @endforelse
