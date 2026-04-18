@@ -1,4 +1,6 @@
-<div class="mx-auto max-w-2xl space-y-6">
+<div class="mx-auto max-w-2xl space-y-6"
+    x-data
+    @notify.window="$flux.toast($event.detail.message)">
     <div class="flex items-center gap-3">
         <flux:button href="{{ route('doctor.appointments.show', $appointmentId) }}" wire:navigate variant="ghost" icon="arrow-left" size="sm">Back</flux:button>
         <flux:heading size="xl">Medical Notes</flux:heading>

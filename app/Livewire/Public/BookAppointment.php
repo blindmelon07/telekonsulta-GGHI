@@ -50,7 +50,7 @@ class BookAppointment extends Component
     }
 
     #[Computed]
-    public function slots(): array
+    public function availableSlots(): array
     {
         if (! $this->selectedDate || ! $this->doctorId) {
             return [];
@@ -67,13 +67,13 @@ class BookAppointment extends Component
     {
         $this->selectedSlot = '';
         $this->resetValidation('selectedDate');
-        unset($this->slots);
+        unset($this->availableSlots);
     }
 
     public function updatedAppointmentType(): void
     {
         $this->selectedSlot = '';
-        unset($this->slots);
+        unset($this->availableSlots);
     }
 
     public function nextStep(): void

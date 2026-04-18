@@ -3,7 +3,7 @@
 
     <div class="rounded-xl border border-zinc-200 bg-white p-8 dark:border-zinc-700 dark:bg-zinc-900">
         <div class="flex items-center gap-4">
-            <flux:avatar :name="$this->appointment->patient->name" size="lg" />
+            <flux:avatar :name="$this->appointment->patient->name" size="md" />
             <div>
                 <h2 class="text-xl font-bold dark:text-white">{{ $this->appointment->patient->name }}</h2>
                 <p class="text-zinc-500">{{ $this->appointment->scheduled_at->format('M d, Y \a\t h:i A') }}</p>
@@ -12,7 +12,7 @@
         </div>
 
         <div class="mt-6 flex gap-3">
-            <flux:button href="{{ $this->appointment->zoom_start_url }}" target="_blank" variant="primary" size="lg" icon="video-camera">
+            <flux:button href="{{ $this->appointment->zoom_start_url }}" target="_blank" variant="primary" icon="video-camera">
                 Start Meeting
             </flux:button>
         </div>

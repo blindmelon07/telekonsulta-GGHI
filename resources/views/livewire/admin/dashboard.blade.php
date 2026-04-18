@@ -37,7 +37,7 @@
                 <div class="flex items-center gap-4 p-4">
                     <div class="flex-1">
                         <p class="text-sm font-semibold dark:text-white">{{ $a->patient->name }}</p>
-                        <p class="text-xs text-zinc-500">with Dr. {{ $a->doctor->user->name }}</p>
+                        <p class="text-xs text-zinc-500">with {{ $a->doctor->user->name }}</p>
                     </div>
                     <p class="text-sm text-zinc-500">{{ $a->scheduled_at->format('M d') }}</p>
                     <flux:badge :color="match($a->status) { 'confirmed' => 'green', 'pending' => 'yellow', 'completed' => 'blue', default => 'zinc' }" size="sm">{{ ucfirst($a->status) }}</flux:badge>

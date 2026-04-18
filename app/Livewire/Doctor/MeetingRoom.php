@@ -5,6 +5,7 @@ namespace App\Livewire\Doctor;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Services\AppointmentService;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -22,15 +23,15 @@ class MeetingRoom extends Component
     #[Validate('nullable|string|max:1000')]
     public string $quickNote = '';
 
-    public function mount(int $appointmentId): void
+    public function mount(int $appointment): void
     {
         $doctor = Doctor::where('user_id', auth()->id())->firstOrFail();
-        Appointment::where('id', $appointmentId)
+        Appointment::where('id', $appointment)
             ->where('doctor_id', $doctor->id)
             ->where('type', 'teleconsultation')
             ->firstOrFail();
 
-        $this->appointmentId = $appointmentId;
+        $this->appointmentId = $appointment;
     }
 
     #[Computed]
@@ -52,7 +53,7 @@ class MeetingRoom extends Component
         $this->redirectRoute('doctor.appointments');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.doctor.meeting-room');
     }

@@ -13,7 +13,24 @@
       "Bash(vendor/bin/pint app/Livewire/Auth/RegisterPatient.php --format agent)",
       "Bash(vendor/bin/pint app/Livewire/Admin/ManageDoctors.php --format agent)",
       "Bash(vendor/bin/pint app/Livewire/Public/BookAppointment.php --format agent)",
-      "mcp__laravel-boost__database-query"
+      "mcp__laravel-boost__database-query",
+      "mcp__laravel-boost__browser-logs",
+      "Read(//c/Users/bry/.claude/projects/c--xampp2-htdocs-teleconsultation/cee9d9fc-d460-45c0-97a4-3368cd510b6a/tool-results/**)",
+      "Bash(python -c \"import sys,json; logs=json.load\\(sys.stdin\\); errors=[l for l in logs if l.get\\('type'\\) in \\('error','warning'\\)]; print\\(json.dumps\\(errors[-30:], indent=2\\)\\)\")",
+      "Bash(python -c \"import sys,json; logs=json.load\\(sys.stdin\\); print\\(json.dumps\\(logs[-10:], indent=2\\)\\)\")",
+      "mcp__laravel-boost__last-error",
+      "Bash(curl -s -b \"mediconnect-session=eyJpdiI6IkxNU01BMkRQa0pJV2VjQ2pvaFZ2RWc9PSIsInZhbHVlIjoia1NtWUJKK1ZHWGo0SVVWck44SnluMVVPSkE3cHZEa0Jlay9NR2tnZk8wdVJnTUNJZXNyeERlMnpPdGRlUE9keVYyZGhSbGRrTUZGMmxOUURUcmxmZm4wakFwQmxkUUJXd0hFWWM1dVdjYlpqRkdSOXlnU0lMZjR2cEplSWg0TjciLCJtYWMiOiI0YWYxYjJkYzMyODZmZmE5Y2U5MTliNjYxY2I0ZjJiMWQxZDljMDE0ZTA4OWEwYjVlNjBkNzcwYzI3NjY0ZTY1IiwidGFnIjoiIn0%3D\" http://127.0.0.1:8000/patient/checkout/1)",
+      "Bash(curl -I http://127.0.0.1:8000/build/assets/app-UfD9FQWK.css)",
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__read-log-entries",
+      "Bash(vendor/bin/pint app/Livewire/Patient/PaymentStatus.php app/Services/PaymentService.php --format agent)",
+      "Bash(vendor/bin/pint app/Livewire/Patient/TeleconsultationRoom.php --format agent)",
+      "Bash(vendor/bin/pint app/Livewire/Patient/Checkout.php --format agent)",
+      "Bash(vendor/bin/pint app/Services/PaymentService.php app/Livewire/Patient/Checkout.php --format agent)",
+      "Bash(python -c \"import sys,json; logs=json.load\\(sys.stdin\\); recent=[l for l in logs[-50:] if 'error' in l.get\\('type',''\\).lower\\(\\) or 'error' in l.get\\('text',''\\).lower\\(\\)[:100]]; [print\\(l['type'],'|',l['text'][:300]\\) for l in recent[-20:]]\")",
+      "Bash(python -c \"import sys,json; logs=json.load\\(sys.stdin\\); [print\\(l.get\\('type',''\\),'|',str\\(l.get\\('text',''\\)\\)[:200]\\) for l in logs[-30:]]\")",
+      "Bash(python -c ' *)",
+      "Bash(vendor/bin/pint app/Services/PaymentService.php --format agent)"
     ]
   }
 }

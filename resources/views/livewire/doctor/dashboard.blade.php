@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <flux:heading size="xl">Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 18 ? 'afternoon' : 'evening') }}, Dr. {{ auth()->user()->name }}!</flux:heading>
+    <flux:heading size="xl">Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 18 ? 'afternoon' : 'evening') }},  {{ auth()->user()->name }}!</flux:heading>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">

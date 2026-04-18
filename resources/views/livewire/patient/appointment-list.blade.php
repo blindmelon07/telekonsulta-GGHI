@@ -20,7 +20,7 @@
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <flux:avatar :name="$appointment->doctor->user->name" class="shrink-0" />
                     <div class="flex-1">
-                        <p class="font-semibold dark:text-white">Dr. {{ $appointment->doctor->user->name }}</p>
+                        <p class="font-semibold dark:text-white">{{ $appointment->doctor->user->name }}</p>
                         <p class="text-sm text-zinc-500">{{ $appointment->doctor->specialization->name }}</p>
                         <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                             {{ $appointment->scheduled_at->format('D, M d Y \a\t h:i A') }}

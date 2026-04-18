@@ -50,6 +50,33 @@ class ManageDoctors extends Component
 
     public bool $isAvailableOnline = false;
 
+    // Edit doctor form
+    public ?int $editingDoctorId = null;
+
+    public ?int $editingUserId = null;
+
+    public string $editName = '';
+
+    public string $editEmail = '';
+
+    public string $editPhone = '';
+
+    public string $editLicenseNumber = '';
+
+    public int|string $editSpecializationId = '';
+
+    public int|string $editExperienceYears = '';
+
+    public string $editBio = '';
+
+    public string $editClinicAddress = '';
+
+    public int|string $editConsultationFee = '';
+
+    public int|string $editTeleconsultationFee = '';
+
+    public bool $editIsAvailableOnline = false;
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -122,6 +149,67 @@ class ManageDoctors extends Component
         $this->modal('create-doctor')->close();
 
         $this->dispatch('doctor-created');
+    }
+
+    public function openEdit(int $doctorId): void
+    {
+        $doctor = Doctor::with('user')->findOrFail($doctorId);
+
+        $this->editingDoctorId = $doctorId;
+        $this->editingUserId = $doctor->user->id;
+        $this->editName = $doctor->user->name;
+        $this->editEmail = $doctor->user->email;
+        $this->editPhone = $doctor->user->phone ?? '';
+        $this->editLicenseNumber = $doctor->license_number;
+        $this->editSpecializationId = $doctor->specialization_id;
+        $this->editExperienceYears = $doctor->experience_years;
+        $this->editBio = $doctor->bio ?? '';
+        $this->editClinicAddress = $doctor->clinic_address ?? '';
+        $this->editConsultationFee = $doctor->consultation_fee / 100;
+        $this->editTeleconsultationFee = $doctor->teleconsultation_fee / 100;
+        $this->editIsAvailableOnline = $doctor->is_available_online;
+
+        $this->modal('edit-doctor')->show();
+    }
+
+    public function updateDoctor(): void
+    {
+        $this->validate([
+            'editName' => ['required', 'string', 'max:255'],
+            'editEmail' => ['required', 'email', 'max:255', "unique:users,email,{$this->editingUserId},id"],
+            'editPhone' => ['required', 'string', 'max:20'],
+            'editLicenseNumber' => ['required', 'string', 'max:100', "unique:doctors,license_number,{$this->editingDoctorId}"],
+            'editSpecializationId' => ['required', 'exists:specializations,id'],
+            'editExperienceYears' => ['required', 'integer', 'min:0', 'max:60'],
+            'editBio' => ['nullable', 'string', 'max:1000'],
+            'editClinicAddress' => ['nullable', 'string', 'max:500'],
+            'editConsultationFee' => ['required', 'numeric', 'min:0'],
+            'editTeleconsultationFee' => ['required_if:editIsAvailableOnline,true', 'nullable', 'numeric', 'min:0'],
+        ]);
+
+        $doctor = Doctor::with('user')->findOrFail($this->editingDoctorId);
+
+        $doctor->user->update([
+            'name' => $this->editName,
+            'email' => $this->editEmail,
+            'phone' => $this->editPhone,
+        ]);
+
+        $doctor->update([
+            'specialization_id' => $this->editSpecializationId,
+            'license_number' => $this->editLicenseNumber,
+            'experience_years' => $this->editExperienceYears,
+            'bio' => $this->editBio ?: null,
+            'clinic_address' => $this->editClinicAddress ?: null,
+            'consultation_fee' => (int) round($this->editConsultationFee * 100),
+            'teleconsultation_fee' => $this->editIsAvailableOnline ? (int) round($this->editTeleconsultationFee * 100) : 0,
+            'is_available_online' => $this->editIsAvailableOnline,
+        ]);
+
+        $this->editingDoctorId = null;
+        unset($this->doctors);
+
+        $this->modal('edit-doctor')->close();
     }
 
     public function toggleActive(int $doctorId): void

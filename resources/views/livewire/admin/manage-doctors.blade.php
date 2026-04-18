@@ -37,6 +37,7 @@
                         </td>
                         <td class="p-4">
                             <div class="flex gap-2">
+                                <flux:button wire:click="openEdit({{ $doctor->id }})" size="sm" variant="ghost" icon="pencil-square">Edit</flux:button>
                                 <flux:button wire:click="toggleActive({{ $doctor->id }})" size="sm" variant="ghost">
                                     {{ $doctor->is_active ? 'Deactivate' : 'Activate' }}
                                 </flux:button>
@@ -52,6 +53,108 @@
     </div>
 
     {{ $this->doctors->links() }}
+
+    {{-- Edit Doctor Modal --}}
+    <flux:modal name="edit-doctor" class="w-full max-w-2xl">
+        <div class="space-y-6">
+            <flux:heading size="lg">Edit Doctor</flux:heading>
+
+            <div class="space-y-4">
+                <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Account Details</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label>Full Name</flux:label>
+                        <flux:input wire:model="editName" placeholder="Dr. Juan Dela Cruz" />
+                        <flux:error name="editName" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Phone Number</flux:label>
+                        <flux:input wire:model="editPhone" placeholder="+63 912 345 6789" />
+                        <flux:error name="editPhone" />
+                    </flux:field>
+                </div>
+
+                <flux:field>
+                    <flux:label>Email Address</flux:label>
+                    <flux:input wire:model="editEmail" type="email" placeholder="doctor@example.com" />
+                    <flux:error name="editEmail" />
+                </flux:field>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Professional Details</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label>Specialization</flux:label>
+                        <flux:select wire:model="editSpecializationId">
+                            <option value="">Select specialization</option>
+                            @foreach($this->specializations as $spec)
+                                <option value="{{ $spec->id }}">{{ $spec->name }}</option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="editSpecializationId" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>License Number</flux:label>
+                        <flux:input wire:model="editLicenseNumber" placeholder="PRC License No." />
+                        <flux:error name="editLicenseNumber" />
+                    </flux:field>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label>Years of Experience</flux:label>
+                        <flux:input wire:model="editExperienceYears" type="number" min="0" max="60" />
+                        <flux:error name="editExperienceYears" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Clinic Address</flux:label>
+                        <flux:input wire:model="editClinicAddress" placeholder="Optional" />
+                        <flux:error name="editClinicAddress" />
+                    </flux:field>
+                </div>
+
+                <flux:field>
+                    <flux:label>Bio</flux:label>
+                    <flux:textarea wire:model="editBio" rows="3" placeholder="Brief professional background (optional)" />
+                    <flux:error name="editBio" />
+                </flux:field>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Fees (in PHP ₱)</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:field>
+                        <flux:label>In-Person Consultation Fee</flux:label>
+                        <flux:input wire:model="editConsultationFee" type="number" min="0" step="0.01" />
+                        <flux:error name="editConsultationFee" />
+                    </flux:field>
+                    <flux:field>
+                        <flux:label>Teleconsultation Fee</flux:label>
+                        <flux:input wire:model="editTeleconsultationFee" type="number" min="0" step="0.01" :disabled="!$editIsAvailableOnline" />
+                        <flux:error name="editTeleconsultationFee" />
+                    </flux:field>
+                </div>
+
+                <flux:field>
+                    <flux:checkbox wire:model.live="editIsAvailableOnline" label="Available for teleconsultation" />
+                </flux:field>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <flux:modal.close>
+                    <flux:button variant="ghost">Cancel</flux:button>
+                </flux:modal.close>
+                <flux:button wire:click="updateDoctor" variant="primary" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="updateDoctor">Save Changes</span>
+                    <span wire:loading wire:target="updateDoctor">Saving...</span>
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 
     {{-- Add Doctor Modal --}}
     <flux:modal name="create-doctor" class="w-full max-w-2xl">

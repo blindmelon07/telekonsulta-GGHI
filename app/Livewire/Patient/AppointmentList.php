@@ -3,6 +3,9 @@
 namespace App\Livewire\Patient;
 
 use App\Models\Appointment;
+use App\Models\Payment;
+use App\Services\AppointmentService;
+use App\Services\PaymentService;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -25,6 +28,25 @@ class AppointmentList extends Component
 
     #[Url]
     public string $type = '';
+
+    public function mount(PaymentService $paymentService): void
+    {
+        // Sync any pending QRPh/card payment intents that may have succeeded
+        // without a webhook (e.g. dev environment or webhook delay).
+        Payment::where('patient_id', auth()->id())
+            ->where('status', 'pending')
+            ->whereNotNull('paymongo_payment_intent_id')
+            ->with('appointment')
+            ->get()
+            ->each(function (Payment $payment) use ($paymentService) {
+                $intent = $paymentService->retrievePaymentIntent($payment->paymongo_payment_intent_id);
+                if (($intent['attributes']['status'] ?? null) === 'succeeded' && ! $payment->isPaid()) {
+                    $payment->update(['status' => 'paid', 'paid_at' => now()]);
+                    $payment->appointment->update(['payment_status' => 'paid']);
+                    app(AppointmentService::class)->markPaid($payment->appointment);
+                }
+            });
+    }
 
     public function updatedTab(): void
     {

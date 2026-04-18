@@ -8,7 +8,7 @@
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between">
                     <dt class="text-zinc-500">Doctor</dt>
-                    <dd class="font-medium">Dr. {{ $this->appointment->doctor->user->name }}</dd>
+                    <dd class="font-medium">{{ $this->appointment->doctor->user->name }}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-zinc-500">Date & Time</dt>

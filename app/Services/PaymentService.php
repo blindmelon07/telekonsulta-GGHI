@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Appointment;
+use App\Events\PaymentConfirmed;
+use App\Jobs\CreateZoomMeetingJob;
+use App\Jobs\SendPaymentReceiptJob;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -21,15 +23,18 @@ class PaymentService
         ];
     }
 
-    /** @param array<string, mixed> $metadata */
-    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = []): array
+    /**
+     * @param  array<string, mixed>  $metadata
+     * @param  array<string>  $paymentMethodAllowed
+     */
+    public function createPaymentIntent(int $amountCentavos, string $description, array $metadata = [], array $paymentMethodAllowed = ['card', 'gcash', 'maya', 'grab_pay']): array
     {
         $response = Http::withHeaders($this->headers())
             ->post("{$this->baseUrl}/payment_intents", [
                 'data' => [
                     'attributes' => [
                         'amount' => $amountCentavos,
-                        'payment_method_allowed' => ['card', 'gcash', 'maya', 'grab_pay'],
+                        'payment_method_allowed' => $paymentMethodAllowed,
                         'payment_method_options' => [
                             'card' => ['request_three_d_secure' => 'any'],
                         ],
@@ -41,7 +46,15 @@ class PaymentService
                 ],
             ]);
 
-        return $response->json('data');
+        $data = $response->json('data');
+
+        if ($data === null) {
+            $error = $response->json('errors.0.detail') ?? $response->json('errors.0.code') ?? 'Unknown PayMongo error';
+            Log::error('PayMongo createPaymentIntent failed', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \RuntimeException("Payment gateway error: {$error}");
+        }
+
+        return $data;
     }
 
     /** @param array<string, mixed> $redirectUrls */
@@ -59,22 +72,87 @@ class PaymentService
                 ],
             ]);
 
-        return $response->json('data');
+        $data = $response->json('data');
+
+        if ($data === null) {
+            $error = $response->json('errors.0.detail') ?? $response->json('errors.0.code') ?? 'Unknown PayMongo error';
+            Log::error('PayMongo createSource failed', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \RuntimeException("Payment gateway error: {$error}");
+        }
+
+        return $data;
     }
 
-    public function attachPaymentMethod(string $intentId, string $methodId): array
+    public function retrieveSource(string $sourceId): array
+    {
+        $response = Http::withHeaders($this->headers())
+            ->get("{$this->baseUrl}/sources/{$sourceId}");
+
+        return $response->json('data') ?? [];
+    }
+
+    public function chargeSource(string $sourceId, int $amount): void
+    {
+        Http::withHeaders($this->headers())
+            ->post("{$this->baseUrl}/payments", [
+                'data' => [
+                    'attributes' => [
+                        'amount' => $amount,
+                        'source' => ['id' => $sourceId, 'type' => 'source'],
+                        'currency' => 'PHP',
+                    ],
+                ],
+            ]);
+    }
+
+    public function createQrphPaymentMethod(): array
+    {
+        $response = Http::withHeaders($this->headers())
+            ->post("{$this->baseUrl}/payment_methods", [
+                'data' => [
+                    'attributes' => [
+                        'type' => 'qrph',
+                    ],
+                ],
+            ]);
+
+        $data = $response->json('data');
+
+        if ($data === null) {
+            $error = $response->json('errors.0.detail') ?? $response->json('errors.0.code') ?? 'Unknown PayMongo error';
+            Log::error('PayMongo createQrphPaymentMethod failed', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \RuntimeException("Payment gateway error: {$error}");
+        }
+
+        return $data;
+    }
+
+    public function attachPaymentMethod(string $intentId, string $methodId, string $returnUrl = ''): array
     {
         $response = Http::withHeaders($this->headers())
             ->post("{$this->baseUrl}/payment_intents/{$intentId}/attach", [
                 'data' => [
                     'attributes' => [
                         'payment_method' => $methodId,
-                        'return_url' => route('patient.payment.callback'),
+                        'return_url' => $returnUrl ?: route('patient.payment.callback'),
                     ],
                 ],
             ]);
 
-        return $response->json('data');
+        $data = $response->json('data');
+
+        if ($data === null) {
+            $error = $response->json('errors.0.detail') ?? $response->json('errors.0.code') ?? 'Unknown PayMongo error';
+            Log::error('PayMongo attachPaymentMethod failed', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \RuntimeException("Payment gateway error: {$error}");
+        }
+
+        Log::info('PayMongo attachPaymentMethod response', [
+            'status' => $data['attributes']['status'] ?? null,
+            'next_action' => $data['attributes']['next_action'] ?? null,
+        ]);
+
+        return $data;
     }
 
     public function createPaymentMethod(string $type, array $billingDetails = [], array $details = []): array
@@ -138,12 +216,15 @@ class PaymentService
     private function handlePaymentPaid(array $resource): void
     {
         $intentId = $resource['attributes']['payment_intent_id'] ?? null;
+        $sourceId = $resource['attributes']['source']['id'] ?? null;
 
-        if (! $intentId) {
-            return;
+        $payment = null;
+
+        if ($intentId) {
+            $payment = Payment::where('paymongo_payment_intent_id', $intentId)->first();
+        } elseif ($sourceId) {
+            $payment = Payment::where('paymongo_source_id', $sourceId)->first();
         }
-
-        $payment = Payment::where('paymongo_payment_intent_id', $intentId)->first();
 
         if (! $payment || $payment->isPaid()) {
             return;
@@ -159,12 +240,12 @@ class PaymentService
         app(AppointmentService::class)->markPaid($payment->appointment);
 
         if ($payment->appointment->type === 'teleconsultation') {
-            \App\Jobs\CreateZoomMeetingJob::dispatch($payment->appointment->id);
+            CreateZoomMeetingJob::dispatch($payment->appointment->id);
         }
 
-        \App\Jobs\SendPaymentReceiptJob::dispatch($payment->id);
+        SendPaymentReceiptJob::dispatch($payment->id);
 
-        \App\Events\PaymentConfirmed::dispatch($payment->appointment);
+        PaymentConfirmed::dispatch($payment->appointment);
     }
 
     private function handleSourceChargeable(array $resource): void
@@ -174,20 +255,11 @@ class PaymentService
 
         $payment = Payment::where('paymongo_source_id', $sourceId)->first();
 
-        if (! $payment) {
+        if (! $payment || $payment->isPaid()) {
             return;
         }
 
-        Http::withHeaders($this->headers())
-            ->post("{$this->baseUrl}/payments", [
-                'data' => [
-                    'attributes' => [
-                        'amount' => $amount,
-                        'source' => ['id' => $sourceId, 'type' => 'source'],
-                        'currency' => 'PHP',
-                    ],
-                ],
-            ]);
+        $this->chargeSource($sourceId, $amount);
     }
 
     private function handlePaymentFailed(array $resource): void

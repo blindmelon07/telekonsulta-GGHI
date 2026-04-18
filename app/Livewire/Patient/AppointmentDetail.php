@@ -4,6 +4,7 @@ namespace App\Livewire\Patient;
 
 use App\Models\Appointment;
 use App\Services\AppointmentService;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -17,9 +18,9 @@ class AppointmentDetail extends Component
     #[Locked]
     public int $appointmentId;
 
-    public function mount(int $appointmentId): void
+    public function mount(int $appointment): void
     {
-        $appointment = Appointment::where('id', $appointmentId)
+        $appointment = Appointment::where('id', $appointment)
             ->where('patient_id', auth()->id())
             ->firstOrFail();
 
@@ -45,7 +46,7 @@ class AppointmentDetail extends Component
         $this->dispatch('appointment-cancelled');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.patient.appointment-detail');
     }

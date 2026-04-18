@@ -5,6 +5,7 @@ namespace App\Livewire\Doctor;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\MedicalRecord;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -36,10 +37,10 @@ class MedicalNoteForm extends Component
     #[Validate('nullable|date|after:today')]
     public string $followUpDate = '';
 
-    public function mount(int $appointmentId): void
+    public function mount(int $appointment): void
     {
         $doctor = Doctor::where('user_id', auth()->id())->firstOrFail();
-        $appointment = Appointment::where('id', $appointmentId)
+        $appointment = Appointment::where('id', $appointment)
             ->where('doctor_id', $doctor->id)
             ->firstOrFail();
 
@@ -77,10 +78,10 @@ class MedicalNoteForm extends Component
         );
 
         $this->dispatch('medical-record-saved');
-        flux()->toast('Medical notes saved successfully!');
+        $this->dispatch('notify', message: 'Medical notes saved successfully!');
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.doctor.medical-note-form');
     }

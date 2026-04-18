@@ -5,11 +5,15 @@ use App\Models\Doctor;
 use App\Models\Schedule;
 use App\Services\SlotGeneratorService;
 use Carbon\Carbon;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
     // Create a doctor with a schedule on Monday (day_of_week=1)
     $this->doctor = Doctor::factory()->create([
         'is_available_online' => true,
@@ -81,7 +85,8 @@ test('book appointment shows slots on step 2 for a scheduled day', function () {
         ->set('appointmentType', 'in_person')
         ->call('nextStep')
         ->set('selectedDate', $monday)
-        ->assertSeeHtml('09:00');
+        ->assertSeeHtml('09:00')
+        ->assertSet('availableSlots', fn ($slots) => count($slots) > 0);
 });
 
 test('changing the selected date clears the selected slot', function () {

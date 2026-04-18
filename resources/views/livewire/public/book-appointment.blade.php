@@ -57,9 +57,9 @@
             @if($selectedDate)
                 <div class="mt-4">
                     <flux:label>Available Slots</flux:label>
-                    @if(count($this->slots) > 0)
+                    @if(count($this->availableSlots) > 0)
                         <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                            @foreach($this->slots as $slot)
+                            @foreach($this->availableSlots as $slot)
                                 <button wire:click="$set('selectedSlot', '{{ $slot }}')"
                                     @class(['rounded-lg border py-2 text-sm font-medium transition', 'border-blue-500 bg-blue-600 text-white' => $selectedSlot === $slot, 'border-zinc-200 hover:border-blue-300 dark:border-zinc-700' => $selectedSlot !== $slot])>
                                     {{ $slot }}

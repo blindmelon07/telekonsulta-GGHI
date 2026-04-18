@@ -3,6 +3,7 @@
 namespace App\Livewire\Public;
 
 use App\Models\Doctor;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -16,9 +17,9 @@ class DoctorProfile extends Component
     #[Locked]
     public int $doctorId;
 
-    public function mount(int $doctorId): void
+    public function mount(int $doctor): void
     {
-        $this->doctorId = $doctorId;
+        $this->doctorId = $doctor;
     }
 
     #[Computed]
@@ -27,7 +28,7 @@ class DoctorProfile extends Component
         return Doctor::with('user', 'specialization')->findOrFail($this->doctorId);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.public.doctor-profile');
     }

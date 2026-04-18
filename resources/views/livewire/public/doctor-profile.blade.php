@@ -28,10 +28,10 @@
         </div>
 
         <div class="mt-8 flex gap-3">
-            <flux:button href="{{ route('doctors.book', $this->doctor->id) }}" wire:navigate variant="primary" size="lg" icon="calendar">
+            <flux:button href="{{ route('doctors.book', $this->doctor->id) }}" wire:navigate variant="primary" icon="calendar">
                 Book Appointment
             </flux:button>
-            <flux:button href="{{ route('doctors.index') }}" wire:navigate variant="ghost" size="lg">
+            <flux:button href="{{ route('doctors.index') }}" wire:navigate variant="ghost">
                 Back to Doctors
             </flux:button>
         </div>

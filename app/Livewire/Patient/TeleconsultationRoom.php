@@ -3,6 +3,7 @@
 namespace App\Livewire\Patient;
 
 use App\Models\Appointment;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -21,9 +22,9 @@ class TeleconsultationRoom extends Component
 
     public bool $canJoin = false;
 
-    public function mount(int $appointmentId): void
+    public function mount(int $appointment): void
     {
-        $appointment = Appointment::where('id', $appointmentId)
+        $appointment = Appointment::where('id', $appointment)
             ->where('patient_id', auth()->id())
             ->where('type', 'teleconsultation')
             ->firstOrFail();
@@ -44,14 +45,22 @@ class TeleconsultationRoom extends Component
         $now = now()->timezone(config('app.timezone'));
         $scheduledAt = $appointment->scheduled_at->timezone(config('app.timezone'));
 
-        $diff = $now->diffInMinutes($scheduledAt, false);
+        $diffMinutes = (int) $now->diffInMinutes($scheduledAt, false);
 
-        if ($diff <= 5 && $diff >= -60) {
+        if ($diffMinutes <= 5 && $diffMinutes >= -60) {
             $this->canJoin = true;
             $this->timeUntilMeeting = 'Now';
-        } elseif ($diff > 0) {
+        } elseif ($diffMinutes > 0) {
             $this->canJoin = false;
-            $this->timeUntilMeeting = "In {$diff} minutes";
+            if ($diffMinutes >= 60) {
+                $hours = intdiv($diffMinutes, 60);
+                $mins = $diffMinutes % 60;
+                $this->timeUntilMeeting = $mins > 0
+                    ? "In {$hours}h {$mins}m"
+                    : "In {$hours} hour".($hours > 1 ? 's' : '');
+            } else {
+                $this->timeUntilMeeting = "In {$diffMinutes} minute".($diffMinutes > 1 ? 's' : '');
+            }
         } else {
             $this->canJoin = false;
             $this->timeUntilMeeting = 'Meeting has ended';
@@ -65,7 +74,7 @@ class TeleconsultationRoom extends Component
         $this->refreshCountdown();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.patient.teleconsultation-room');
     }
