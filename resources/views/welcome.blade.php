@@ -242,7 +242,7 @@
                 ['bg-cyan-50', 'text-cyan-600', 'border-cyan-100', 'from-cyan-500 to-cyan-600', 'M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776', 'Digital Health Records', 'Access your full medical history, lab results, and notes in one place.'],
                 ['bg-emerald-50', 'text-emerald-600', 'border-emerald-100', 'from-emerald-500 to-emerald-600', 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z', 'E-Prescriptions', 'Receive digital prescriptions directly from your doctor after consultation.'],
                 ['bg-violet-50', 'text-violet-600', 'border-violet-100', 'from-violet-500 to-violet-600', 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', 'Health Monitoring', 'Track vitals and health metrics, and share data with your care team.'],
-                ['bg-rose-50', 'text-rose-600', 'border-rose-100', 'from-rose-500 to-rose-600', 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z', 'Secure Payments', 'Pay via QRPh, GCash, Maya, or card — all transactions encrypted.'],
+                ['bg-rose-50', 'text-rose-600', 'border-rose-100', 'from-rose-500 to-rose-600', 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z', 'Secure Payments', 'Pay via QRPh scan-to-pay — fast, secure, and accepted by all major banks and e-wallets.'],
             ] as [$bg, $ic, $border, $grad, $path, $title, $desc])
             <div class="bg-white rounded-2xl p-6 border {{ $border }} card-hover cursor-default">
                 <div class="w-12 h-12 rounded-xl bg-gradient-to-br {{ $grad }} flex items-center justify-center mb-5 shadow-md">
@@ -353,7 +353,7 @@
         <div class="grid md:grid-cols-3 gap-6">
             @foreach([
                 ['Maria L.', 'Quezon City', 'The video consultation was seamless. Dr. Reyes diagnosed my condition in under 15 minutes. I didn\'t even have to leave my home — amazing experience!', 5, 'from-blue-400 to-indigo-500'],
-                ['Jose R.', 'Cebu City', 'Booking an appointment took less than 2 minutes. Payment via GCash was instant. I got my e-prescription right after the consultation.', 5, 'from-cyan-400 to-blue-500'],
+                ['Jose R.', 'Cebu City', 'Booking an appointment took less than 2 minutes. Payment via QRPh was instant. I got my e-prescription right after the consultation.', 5, 'from-cyan-400 to-blue-500'],
                 ['Ana P.', 'Davao City', 'As a mother of three, GSAC Health has been a lifesaver. I can consult with a pediatrician at midnight without the usual emergency room wait.', 5, 'from-indigo-400 to-violet-500'],
             ] as [$name, $loc, $quote, $stars, $grad])
             <div class="bg-white rounded-2xl p-7 border border-gray-100 card-hover">
@@ -383,9 +383,13 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <p class="text-center text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">Accepted Payment Methods</p>
         <div class="flex flex-wrap justify-center items-center gap-4">
-            @foreach(['QRPh', 'GCash', 'Maya', 'GrabPay', 'Visa', 'Mastercard', 'PhilHealth'] as $method)
-            <div class="px-5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-default">
+            <div class="px-5 py-2.5 rounded-xl border border-blue-300 bg-blue-50 text-sm font-bold text-blue-700 cursor-default">
+                QRPh
+            </div>
+            @foreach(['GCash', 'Maya', 'GrabPay', 'Visa', 'Mastercard'] as $method)
+            <div class="relative px-5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-400 cursor-default opacity-60">
                 {{ $method }}
+                <span class="absolute -top-2 -right-2 rounded-full bg-gray-300 px-1.5 py-0.5 text-[9px] font-bold text-gray-500 leading-none">SOON</span>
             </div>
             @endforeach
         </div>

@@ -63,15 +63,23 @@
                 <flux:heading size="lg" class="mb-4">Payment Method</flux:heading>
 
                 <div class="space-y-3">
-                    @foreach(['qrph' => 'QRPh (Scan to Pay)', 'gcash' => 'GCash', 'maya' => 'Maya', 'grab_pay' => 'GrabPay', 'card' => 'Credit / Debit Card'] as $value => $label)
-                        <div wire:click="$set('paymentMethod', '{{ $value }}')"
-                            @class(['flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition', 'border-blue-500 bg-blue-50 dark:bg-blue-950' => $paymentMethod === $value, 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' => $paymentMethod !== $value])>
-                            <div @class(['h-4 w-4 rounded-full border-2 shrink-0', 'border-blue-500 bg-blue-500' => $paymentMethod === $value, 'border-zinc-300' => $paymentMethod !== $value])></div>
-                            <div>
-                                <span class="font-medium dark:text-white">{{ $label }}</span>
-                                @if($value === 'qrph')
-                                    <p class="text-xs text-zinc-500">Pay via any bank or e-wallet app that supports QR Ph</p>
-                                @endif
+                    {{-- QRPh: active --}}
+                    <div wire:click="$set('paymentMethod', 'qrph')"
+                        @class(['flex cursor-pointer items-center gap-3 rounded-lg border-2 p-4 transition', 'border-blue-500 bg-blue-50 dark:bg-blue-950' => $paymentMethod === 'qrph', 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700' => $paymentMethod !== 'qrph'])>
+                        <div @class(['h-4 w-4 rounded-full border-2 shrink-0', 'border-blue-500 bg-blue-500' => $paymentMethod === 'qrph', 'border-zinc-300' => $paymentMethod !== 'qrph'])></div>
+                        <div>
+                            <span class="font-medium dark:text-white">QRPh (Scan to Pay)</span>
+                            <p class="text-xs text-zinc-500">Pay via any bank or e-wallet app that supports QR Ph</p>
+                        </div>
+                    </div>
+
+                    {{-- Coming Soon methods --}}
+                    @foreach(['GCash', 'Maya', 'GrabPay', 'Credit / Debit Card'] as $label)
+                        <div class="flex cursor-not-allowed items-center gap-3 rounded-lg border-2 border-zinc-200 bg-zinc-50 p-4 opacity-60 dark:border-zinc-700 dark:bg-zinc-800/50">
+                            <div class="h-4 w-4 rounded-full border-2 border-zinc-300 shrink-0"></div>
+                            <div class="flex flex-1 items-center justify-between">
+                                <span class="font-medium text-zinc-400 dark:text-zinc-500">{{ $label }}</span>
+                                <span class="rounded-full bg-zinc-200 px-2 py-0.5 text-xs font-semibold text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">Coming Soon</span>
                             </div>
                         </div>
                     @endforeach
